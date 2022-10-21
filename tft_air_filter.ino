@@ -5,7 +5,7 @@
 
 
 //set pms
-SoftwareSerial mySerial(17, 16);  // RX, TX
+SoftwareSerial mySerial(32, 33);  // RX, TX
 unsigned int pm1 = 0;
 unsigned int pm2_5 = 0;
 unsigned int pm10 = 0;
@@ -121,7 +121,7 @@ void loop() {
 
   //PM2.5
   myGLCD.drawString("PM 2.5", 60, 40, 2);
-  myGLCD.drawNumber(pm2_5, 75, 73, 4);
+  myGLCD.drawNumber(pm2_5, 65, 73, 4);
   myGLCD.drawString(" ug./m3", 60, 123, 2);
 
 
@@ -134,8 +134,5 @@ void loop() {
   myGLCD.drawString("Temp", 185, 130, 2);
   myGLCD.drawString(String(t), 170, 160, 4);
   myGLCD.drawString("celsius", 180, 190, 2);
-
-
-
   delay(1000);
 }
