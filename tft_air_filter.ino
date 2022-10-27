@@ -1,7 +1,12 @@
+//set tft
 #include "SPI.h"
 
 #include "TFT_eSPI.h"
 #include <SoftwareSerial.h>
+
+//set led
+#define POTENTIOMETER_PIN  36  // ESP32 pin GIOP36 (ADC0) connected to Potentiometer pin
+#define LED_PIN            21
 
 
 //set pms
@@ -30,7 +35,7 @@ void setup() {
 
   Serial.println(F("DHTxx test!"));
   dht.begin();
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial)
     ;
   mySerial.begin(9600);
@@ -40,6 +45,9 @@ void setup() {
   // Setup the LCD
   myGLCD.init();
   myGLCD.setRotation(1);
+
+  //led
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
@@ -135,4 +143,30 @@ void loop() {
   myGLCD.drawString(String(t), 170, 160, 4);
   myGLCD.drawString("celsius", 180, 190, 2);
   delay(1000);
+
+  //led
+  // reads the input on analog pin A0 (value between 0 and 4095)
+  int analogValue = analogRead(POTENTIOMETER_PIN);
+
+  // scales it to brightness (value between 0 and 255)
+  int brightness = map(analogValue, 0, 4095, 0, 255);
+
+  // sets the brightness LED that connects to  pin 3
+  analogWrite(LED_PIN, brightness);
+
+  // print out the value
+  Serial.print("Analog value = ");
+  Serial.print(analogValue);
+  Serial.print(" => brightness = ");
+  Serial.println(brightness);
+  delay(100);
+
+  // fan control
+  /*if (pm2_5 <= 12) {
+    Serial.println("fan low");
+  } else if (pm2_5 <= 35) {
+    Serial.println("fan moderate");
+  }else {
+    Serial.println("fan max");
+  }*/
 }
