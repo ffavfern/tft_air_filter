@@ -1,3 +1,16 @@
+//set dimmer 
+#include <RBDdimmer.h>
+//Parameters
+const int zeroCrossPin  = 35;
+const int acdPin  = 21;
+int MIN_POWER  = 0;
+int MAX_POWER  = 100;
+int POWER_STEP  = 2;
+//Variables
+int power  = 0;
+//Objects
+dimmerLamp acd(acdPin,zeroCrossPin);
+
 //set tft
 #include "SPI.h"
 
@@ -23,22 +36,20 @@ unsigned int pm10 = 0;
 DHT dht(DHTPIN, DHTTYPE);
 
 
-
 //set TFT
-
 #define TFT_GREY 0x7BEF
 
 TFT_eSPI myGLCD = TFT_eSPI();  // Invoke custom library
 
 unsigned long runTime = 0;
 void setup() {
-
   Serial.println(F("DHTxx test!"));
   dht.begin();
   Serial.begin(115200);
+  acd.begin(NORMAL_MODE, ON);
   while (!Serial)
     ;
-  mySerial.begin(9600);
+  mySerial.begin(115200);
 
 
   randomSeed(analogRead(A0));
@@ -46,9 +57,8 @@ void setup() {
   myGLCD.init();
   myGLCD.setRotation(1);
 
-  //led
-  pinMode(LED_PIN, OUTPUT);
 }
+
 
 void loop() {
   //dht11 sensor
@@ -144,29 +154,22 @@ void loop() {
   myGLCD.drawString("celsius", 180, 190, 2);
   delay(1000);
 
-  //led
-  // reads the input on analog pin A0 (value between 0 and 4095)
-  int analogValue = analogRead(POTENTIOMETER_PIN);
+  
+//Sweep light power to test dimmer
+  for(power=MIN_POWER;power<=MAX_POWER;power+=POWER_STEP){
+    acd.setPower(power); // setPower(0-100%);
+      Serial.print("lampValue -> ");
+      Serial.print(acd.getPower());
+      Serial.println("%");
+    delay(100);
+  }
+  for(power=MAX_POWER;power>=MIN_POWER;power-=POWER_STEP){
+    acd.setPower(power); // setPower(0-100%);
+      Serial.print("lampValue -> ");
+      Serial.print(acd.getPower());
+      Serial.println("%");
+    delay(100);
 
-  // scales it to brightness (value between 0 and 255)
-  int brightness = map(analogValue, 0, 4095, 0, 255);
 
-  // sets the brightness LED that connects to  pin 3
-  analogWrite(LED_PIN, brightness);
-
-  // print out the value
-  Serial.print("Analog value = ");
-  Serial.print(analogValue);
-  Serial.print(" => brightness = ");
-  Serial.println(brightness);
-  delay(100);
-
-  // fan control
-  /*if (pm2_5 <= 12) {
-    Serial.println("fan low");
-  } else if (pm2_5 <= 35) {
-    Serial.println("fan moderate");
-  }else {
-    Serial.println("fan max");
-  }*/
+}
 }
