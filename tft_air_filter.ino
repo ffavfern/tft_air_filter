@@ -1,15 +1,16 @@
-//set dimmer 
+//set dimmer
 #include <RBDdimmer.h>
 //Parameters
-const int zeroCrossPin  = 35;
-const int acdPin  = 21;
-int MIN_POWER  = 0;
-int MAX_POWER  = 100;
-int POWER_STEP  = 2;
+const int zeroCrossPin = 35;
+const int acdPin = 21;
+int MIN_POWER = 50;
+int MAX_POWER = 100;
 //Variables
-int power  = 0;
+int power_min = 50;
+int power_max = 100;
+int power_moderate = 75;
 //Objects
-dimmerLamp acd(acdPin,zeroCrossPin);
+dimmerFan acd(acdPin, zeroCrossPin);
 
 //set tft
 #include "SPI.h"
@@ -18,8 +19,8 @@ dimmerLamp acd(acdPin,zeroCrossPin);
 #include <SoftwareSerial.h>
 
 //set led
-#define POTENTIOMETER_PIN  36  // ESP32 pin GIOP36 (ADC0) connected to Potentiometer pin
-#define LED_PIN            21
+#define POTENTIOMETER_PIN 36  // ESP32 pin GIOP36 (ADC0) connected to Potentiometer pin
+#define LED_PIN 21
 
 
 //set pms
@@ -56,7 +57,6 @@ void setup() {
   // Setup the LCD
   myGLCD.init();
   myGLCD.setRotation(1);
-
 }
 
 
@@ -154,22 +154,42 @@ void loop() {
   myGLCD.drawString("celsius", 180, 190, 2);
   delay(1000);
 
-  
-//Sweep light power to test dimmer
-  for(power=MIN_POWER;power<=MAX_POWER;power+=POWER_STEP){
-    acd.setPower(power); // setPower(0-100%);
-      Serial.print("lampValue -> ");
-      Serial.print(acd.getPower());
-      Serial.println("%");
-    delay(100);
+
+  //Sweep Fan power to test dimmer
+  /*for (power = MIN_POWER; power <= MAX_POWER; power += POWER_STEP) {
+    acd.setPower(power);  // setPower(0-100%);
+    Serial.print("lampValue -> ");
+    Serial.print(acd.getPower());
+    Serial.println("%");
+    delay(1000);
   }
-  for(power=MAX_POWER;power>=MIN_POWER;power-=POWER_STEP){
-    acd.setPower(power); // setPower(0-100%);
-      Serial.print("lampValue -> ");
-      Serial.print(acd.getPower());
-      Serial.println("%");
-    delay(100);
+  for (power = MAX_POWER; power >= MIN_POWER; power -= POWER_STEP) {
+    acd.setPower(power);  // setPower(0-100%);
+    Serial.print("lampValue -> ");
+    Serial.print(acd.getPower());
+    Serial.println("%");
+    delay(1000);
+  }*/
 
-
-}
+  if (pm2_5 <= 12) {
+    acd.setPower(power_min);
+    Serial.print("FanValue -> ");
+    Serial.print(acd.getPower());
+    Serial.println("%");
+    delay(1000);
+  }
+  else if (pm2_5 <= 35) {
+    acd.setPower(power_moderate);
+    Serial.print("FanValue -> ");
+    Serial.print(acd.getPower());
+    Serial.println("%");
+    delay(1000);
+  }
+  else {
+    acd.setPower(power_max);
+    Serial.print("FanValue -> ");
+    Serial.print(acd.getPower());
+    Serial.println("%");
+    delay(1000);
+  }
 }
