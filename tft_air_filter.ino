@@ -1,3 +1,6 @@
+// set lamp UV
+const int relay = 15;
+
 //set dimmer
 #include <RBDdimmer.h>
 const int zeroCrossPin = 35;
@@ -36,18 +39,21 @@ unsigned long runTime = 0;
 void setup() {
   Serial.println(F("DHTxx test!"));
   dht.begin();
-  Serial.begin(921600);
+  Serial.begin(115200);
   acd.begin(NORMAL_MODE, ON);
   while (!Serial)
     ;
-  mySerial.begin(921600);
+  mySerial.begin(115200);
   // Setup the LCD
   myGLCD.init();
   myGLCD.setRotation(1);
+  pinMode(relay, OUTPUT);
 }
 
 
 void loop() {
+  // Lamp UV
+  digitalWrite(relay, LOW);
   //dht11 sensor
   delay(2000);
   float h = dht.readHumidity();
@@ -141,15 +147,7 @@ void loop() {
   delay(1000);
 
   //set fan dimmer
-
-  if (pm2_5 == 0) {
-    acd.setPower(power_off);
-    Serial.print("FanValue -> ");
-    Serial.print(acd.getPower());
-    Serial.println("%");
-    delay(1000);
-  }
-  else if (pm2_5 <= 12) {
+  if (pm2_5 <= 12) {
     acd.setPower(power_min);
     Serial.print("FanValue -> ");
     Serial.print(acd.getPower());
