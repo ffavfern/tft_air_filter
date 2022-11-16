@@ -1,34 +1,25 @@
 //set dimmer
 #include <RBDdimmer.h>
-//Parameters
 const int zeroCrossPin = 35;
 const int acdPin = 21;
-int MIN_POWER = 50;
+int MIN_POWER = 0;
 int MAX_POWER = 100;
-//Variables
-int power_min = 50;
+int power_min = 25;
 int power_max = 100;
-int power_moderate = 75;
-//Objects
-dimmerFan acd(acdPin, zeroCrossPin);
+int power_moderate = 50;
+int power_off =0;
+dimmerLamp acd(acdPin, zeroCrossPin);
 
 //set tft
 #include "SPI.h"
-
 #include "TFT_eSPI.h"
 #include <SoftwareSerial.h>
 
-//set led
-#define POTENTIOMETER_PIN 36  // ESP32 pin GIOP36 (ADC0) connected to Potentiometer pin
-#define LED_PIN 21
-
-
-//set pms
+//set pms5003
 SoftwareSerial mySerial(32, 33);  // RX, TX
 unsigned int pm1 = 0;
 unsigned int pm2_5 = 0;
 unsigned int pm10 = 0;
-
 
 //set dht
 #include "DHT.h"
@@ -36,24 +27,20 @@ unsigned int pm10 = 0;
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
-
 //set TFT
 #define TFT_GREY 0x7BEF
-
 TFT_eSPI myGLCD = TFT_eSPI();  // Invoke custom library
-
 unsigned long runTime = 0;
+
+
 void setup() {
   Serial.println(F("DHTxx test!"));
   dht.begin();
-  Serial.begin(115200);
+  Serial.begin(921600);
   acd.begin(NORMAL_MODE, ON);
   while (!Serial)
     ;
-  mySerial.begin(115200);
-
-
-  randomSeed(analogRead(A0));
+  mySerial.begin(921600);
   // Setup the LCD
   myGLCD.init();
   myGLCD.setRotation(1);
@@ -83,7 +70,6 @@ void loop() {
   Serial.print(F("%  Temperature: "));
   Serial.print(t);
   Serial.print(F("°C "));
-
 
 
   //PMS5003
@@ -154,24 +140,16 @@ void loop() {
   myGLCD.drawString("celsius", 180, 190, 2);
   delay(1000);
 
+  //set fan dimmer
 
-  //Sweep Fan power to test dimmer
-  /*for (power = MIN_POWER; power <= MAX_POWER; power += POWER_STEP) {
-    acd.setPower(power);  // setPower(0-100%);
-    Serial.print("lampValue -> ");
+  if (pm2_5 == 0) {
+    acd.setPower(power_off);
+    Serial.print("FanValue -> ");
     Serial.print(acd.getPower());
     Serial.println("%");
     delay(1000);
   }
-  for (power = MAX_POWER; power >= MIN_POWER; power -= POWER_STEP) {
-    acd.setPower(power);  // setPower(0-100%);
-    Serial.print("lampValue -> ");
-    Serial.print(acd.getPower());
-    Serial.println("%");
-    delay(1000);
-  }*/
-
-  if (pm2_5 <= 12) {
+  else if (pm2_5 <= 12) {
     acd.setPower(power_min);
     Serial.print("FanValue -> ");
     Serial.print(acd.getPower());
